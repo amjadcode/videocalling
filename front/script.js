@@ -16,6 +16,7 @@ let init = async () => {
     video: true,
     audio: true,
   });
+
   document.getElementById("user-1").srcObject = localStream;
   peerConnection = new RTCPeerConnection(servers);
   localStream.getTracks().forEach(async (track) => {
@@ -37,7 +38,7 @@ let init = async () => {
     // });
   };
   //!after call come
-  socket.on("comedAnswer", (data) => {
+  socket.on("comedAnswer", async (data) => {
     console.log("answer from recieving side: ", data);
     peerConnection.setRemoteDescription(
       new RTCSessionDescription(data.finalanswer)
@@ -53,8 +54,8 @@ let init = async () => {
       });
     }
   };
-  //!send the offer to other user
   let offer = await peerConnection.createOffer();
+
   socket.emit("calltoOtherUser", {
     fromCall: localUserPhone,
     toCall: otherUserPhone,
@@ -132,8 +133,8 @@ socket.on("call_incoming", async (data) => {
   });
   const answer = await peerConnection.createAnswer();
   console.log("answer: ", answer);
-  await peerConnection.setLocalDescription(answer);
   socket.emit("callRecieved", { theAnswer: answer, toAnswer: data.fromCall });
+  await peerConnection.setLocalDescription(answer);
 });
 
 document.getElementById("setlocalphone").onclick = () => {
